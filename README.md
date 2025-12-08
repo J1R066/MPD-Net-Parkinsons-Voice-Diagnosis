@@ -21,7 +21,9 @@ This study evaluates model performance across three distinct datasets representi
 
 1. **Italian Parkinson's Voice and Speech:** High-quality, studio-recorded data (495 PD, 336 HC). Used as the controlled baseline.
 2. **UAMS (University of Arkansas for Medical Sciences):** Telephonic quality recordings with limited bandwidth (40 PD, 41 HC). Represents moderate noise conditions.
-3. **mPower (Sage Bionetworks):** Crowdsourced smartphone recordings collected via iPhone app (188 PD, 210 HC). Represents high-noise, uncontrolled real-world environments.
+3. **mPower (Sage Bionetworks):** Crowdsourced smartphone recordings collected via iPhone app.
+    * **Selection Criteria:** To minimize confounding factors and ensure data consistency, the raw dataset was filtered to include only subjects aged **50 to 70 years** who did not have other medical conditions affecting voice. Additionally, recordings with excessive environmental noise or artifacts were manually excluded.
+    * **Final Count:** This process resulted in a challenging test set of **188 PD patients and 210 Healthy Controls (HC)**, representing high-noise, uncontrolled real-world environments.
 
 Note: Due to privacy agreements, this repository contains the processing code. You must request access to the raw data from the respective owners.
 
