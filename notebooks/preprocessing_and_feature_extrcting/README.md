@@ -2,6 +2,9 @@
 
 This module is responsible for the end-to-end preparation of audio data for the MPD-Net model. It handles raw signal processing, data augmentation, class balancing, and spectral feature extraction.
 
+<img width="896" height="665" alt="image" src="https://github.com/user-attachments/assets/9b2c6855-409d-4dac-a00d-2561f5623207" />
+
+
 ## Visualization & Verification
 
 The pipeline includes built-in visualization functions to verify data integrity and ensure that signal processing steps are performing correctly before the machine learning phase begins.
