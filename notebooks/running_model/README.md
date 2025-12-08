@@ -2,7 +2,7 @@
 
 The MPD-Net (Parallel) was compared against a Sequential baseline (PD-Net) and a Transfer Learning approach (InceptionV3) across three datasets. The results demonstrate the superior robustness of the parallel architecture in handling real-world, noisy data.
 
-## 🏆 Performance Evaluation
+## Performance Evaluation
 
 The model achieved near-perfect classification on the high-quality Italian dataset, demonstrating its capability to learn subtle vocal biomarkers in controlled conditions.
 
@@ -37,44 +37,3 @@ Grad-CAM visualizes the spatial attention of the CNN branch, confirming that the
 
 ![Grad-CAM Attention Maps](Screenshot%202025-12-08%20130254.png)
 *Figure 3: Grad-CAM Analysis. The heatmaps show the model's attention (red/yellow regions) distributed across the temporal structure of the audio, indicating a comprehensive analysis strategy rather than "tunnel vision" on a single artifact.*
-
----
-
-# Data Processing & Feature Extraction
-
-This module is responsible for the end-to-end preparation of audio data for the MPD-Net model. It includes built-in visualization tools to verify data integrity before training.
-
-## Visualization & Verification
-
-### Augmentation Verification
-Before training, the system verifies that augmentations do not corrupt the signal structure. The figure below illustrates the effect of data augmentation on a sample waveform from the Italian dataset.
-
-![Augmentation Effect on a Sample Waveform](augmentation_visualization_A_DEFAULT.png)
-*Figure 4: The top graph shows the original raw audio signal. The bottom graph displays the same signal after pitch shifting. Note that the temporal structure remains consistent, preserving the diagnostic content.*
-
-### Feature Inspection
-To ensure spectral features are computed correctly, the pipeline generates heatmaps for random samples. These 2D representations serve as the parallel inputs for the MPD-Net model.
-
-![Feature Extraction Examples](feature_visualizations_A_DEFAULT.png)
-*Figure 5: Feature Extraction. Top row: Mel Spectrograms visualizing energy distribution. Bottom row: MFCCs capturing spectral envelope and vocal tract characteristics.*
-
-## Usage
-
-The data processing script is designed to be executed directly from the command line interface (CLI).
-
-### Command Line Arguments
-
-To run the script, use the following flags:
-
-* **--dataset**: Specifies which dataset to process (`ITALIAN_DATASET`, `UAMS_DATASET`, `MPOWER_DATASET`).
-* **--mode**: Specifies the subset of audio files (`A` for vowel /a/, `ALL_VALIDS` for all tasks).
-* **--feature_mode**: Specifies the feature set (`DEFAULT` extracts Mel Spectrograms + MFCCs).
-
-### Execution Examples
-
-```bash
-# Process the high-quality Italian dataset (Vowel /a/)
-python process_data_and_extract_features.py --dataset ITALIAN_DATASET --mode A
-
-# Process the noisy mPower dataset (All voice tasks)
-python process_data_and_extract_features.py --dataset MPOWER_DATASET --mode ALL_VALIDS
