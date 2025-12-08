@@ -1,183 +1,111 @@
-# MPD-Net-Parkinsons-Voice-Diagnosis
-### MPD-Net: Robust Parkinson's Disease Diagnosis via Parallel Voice Analysis
+# MPD-Net: Robust Parkinson's Disease Diagnosis via Parallel Voice Analysis
 
-This repository presents the implementation and evaluation of **MPD-Net (Multi-stream Parkinson's Disease Network)**, a hybrid deep learning architecture for the non-invasive screening and diagnosis of Parkinson's Disease (PD) through acoustic analysis of sustained vowels (specifically /a/)
+## Abstract
+This repository houses the implementation of **MPD-Net (Multi-stream Parkinson's Disease Network)**, a parallel hybrid deep learning architecture designed for the non-invasive screening of Parkinson's Disease (PD) using voice analysis. While deep learning has shown promise in controlled environments, performance often degrades on real-world data. This project addresses this gap by proposing a parallel architecture that integrates **CNNs**, **LSTMs**, and **Multi-Head Attention** to process spectral features simultaneously.
 
-#### **Project Goal**
-The core objective is to achieve a superior balance between diagnostic **accuracy**, computational **efficiency**, and **robustness** against the low-quality, noisy data collected in real-world environments (e.g., the mPower dataset).
+The study validates that parallel processing offers superior robustness against noise compared to sequential models, mitigating the "tunnel vision" phenomenon often observed in deep learning models trained on noisy acoustic data.
 
-#### **Key Features**
-* **Parallel, Hybrid Architecture (MPD-Net):** Integrates **Convolutional Neural Networks (CNN)**, **Long Short-Term Memory (LSTM)**, and **Multi-Head Attention** mechanisms in parallel streams to robustly process diverse spectral features simultaneously.
-* **Feature Fusion:** Utilizes a combined input of **Mel Spectrograms** and **Mel-Frequency Cepstral Coefficients (MFCCs)** for comprehensive acoustic analysis.
-* **Enhanced Robustness:** Demonstrated superior performance and gradual degradation on noisy, real-world data (mPower) compared to sequential models, mitigating "tunnel vision" and ensuring greater reliability.
-* **Interpretability Analysis:** Includes advanced explainability techniques (**SHAP** and **Grad-CAM**) to visualize and understand model decisions, identifying the crucial time-frequency patterns used for diagnosis.
+## Table of Contents
+- [Abstract](#abstract)
+- [Datasets](#datasets)
+- [Methodology](#methodology)
+- [Results & Robustness Analysis](#results--robustness-analysis)
+- [Interpretability & XAI Analysis](#interpretability--xai-analysis)
+- [Overall Conclusion](#overall-conclusion)
+- [Discussion](#discussion)
+- [Future Directions](#future-directions)
+- [Citation](#citation)
+- 
+## Datasets
+This study evaluates model performance across three distinct datasets representing a spectrum of audio quality, from studio-grade to real-world "wild" data.
 
-#### **Performance Highlights**
-* Achieved near-perfect performance on high-quality lab data (**AUC $\approx 1.00$ on Italian Dataset**).
-* Maintained a higher level of diagnostic capability on noisy real-world data (**AUC $= 0.653$ on mPower**) compared to the baseline sequential models, validating its robustness.
+1. **Italian Parkinson's Voice and Speech:** High-quality, studio-recorded data (495 PD, 336 HC). Used as the controlled baseline.
+2. **UAMS (University of Arkansas for Medical Sciences):** Telephonic quality recordings with limited bandwidth (40 PD, 41 HC). Represents moderate noise conditions.
+3. **mPower (Sage Bionetworks):** Crowdsourced smartphone recordings collected via iPhone app (188 PD, 210 HC). Represents high-noise, uncontrolled real-world environments.
 
-## 🎧 Pre-processing and Data Augmentation
+Note: Due to privacy agreements, this repository contains the processing code. You must request access to the raw data from the respective owners.
 
-The goal of pre-processing is to transform variable-quality raw audio files into uniform feature representations suitable for the hybrid deep learning architecture.
+## Methodology
 
----
+### 1. Pre-processing & Feature Extraction
+The pipeline processes raw audio (sustained vowel /a/) into dual spectral representations.
 
-### 1. Signal Preparation
-* **Input Signal:** Raw audio signals, each approximately 3 seconds long, were used with a **16 kHz sampling rate**.
-* **Segmentation:** Continuous signals were divided into **30-millisecond frames** for short-term analysis.
-* **Uniform Length:** Signal lengths were made uniform using **padding** (adding zeros) or **trimming** to maintain a consistent 3-second duration. For the mPower dataset, silence at the beginning and end of the audio was removed.
-* **Amplitude Normalization:** Signal amplitudes were scaled to a uniform range to minimize variations caused by recording intensity.
+* **Signal Processing:** 16kHz sampling, segmented into 30ms frames, normalized, and padded to 3 seconds.
+* **Data Augmentation:** To prevent overfitting, signals undergo pitch shifting (+/- 2 semitones), gain adjustment, and white noise injection (SNR 10-30 dB).
+* **Features:**
+    * **Mel Spectrogram:** (30 bands x 94 frames) capturing energy distribution.
+    * **MFCCs:** (30 coefficients) capturing vocal tract properties.
 
-### 2. Data Augmentation and Balancing
-To increase the dataset's size and variety and to prevent **overfitting**, the following data augmentation techniques were applied to the raw audio signals, generating three new versions for every original file:
-* **Pitch Shifting:** The voice pitch was slightly altered (by $\pm 2$ semitones, coefficient 1.5) to simulate the variations expected across different speakers and make the model more resistant to minor pitch differences.
-* **Gain Augmentation:** The volume or loudness was randomly adjusted ($\pm 10\%$) to account for differences in microphone distance or speaking intensity.
-* **White Noise Addition:** White noise was added with a Signal-to-Noise Ratio (**SNR**) between $10-30 \text{ dB}$ to enhance the model's resistance to environmental noise.
+### 2. MPD-Net Architecture
+Unlike sequential models (e.g., CNN -> LSTM), MPD-Net processes the input (194 x 60 combined features) through three parallel streams to capture diverse acoustic characteristics simultaneously.
 
-Additionally, **Class Balancing** was performed by randomly copying samples from the minority class (either healthy or patient) to match the number of samples in the majority class, which resulted in a final balanced set of **3496 samples**.
+* **Stream 1 (Spatial):** CNN blocks to extract local spectral patterns.
+* **Stream 2 (Temporal):** LSTM layers to model long-term dependencies and tremors.
+* **Stream 3 (Focus):** Multi-Head Attention to highlight critical signal segments.
+* **Fusion:** Outputs are concatenated and passed through a Dense layer (128 units) for binary classification.
 
----
+## Results & Robustness Analysis
 
-## Feature Description
+The MPD-Net (Parallel) was compared against a Sequential baseline (PD-Net) and a Transfer Learning approach (InceptionV3).
 
-The deep learning models rely on a fusion of two powerful and complementary spectral features: **Mel Spectrograms** and **Mel-Frequency Cepstral Coefficients (MFCCs)**.
+| Dataset | Quality | MPD-Net (Proposed) AUC | PD-Net (Sequential) AUC | Observation |
+| :--- | :--- | :--- | :--- | :--- |
+| **Italian** | Studio | **1.00** | 0.99 | Near perfect separation in lab conditions. |
+| **UAMS** | Phone | **0.871** | 0.649 | MPD-Net retains discriminative power; Sequential degrades. |
+| **mPower** | Wild | **0.653** | 0.500 | Sequential model collapsed (random guess); MPD-Net remained robust. |
 
-### 1. Mel Spectrogram (Mel-Spectrogram)
+## Interpretability & XAI Analysis
 
-The Mel Spectrogram is a **two-dimensional visual representation** of the audio signal's energy distribution across different frequencies over time. It is widely used because its frequency axis is scaled according to the **Mel scale**, which aligns more closely with human auditory perception.
-
-The process involves:
-* **Short-time Fourier Transform (STFT):** The signal is broken down into short frames (30 ms with 10 ms overlap), and the frequency spectrum is calculated for each frame.
-* **Mel Scale Mapping:** The resulting linear frequency spectrum is filtered using **30 Mel filter banks**.
-* **Output:** The final output is a 2D matrix of **$30 \times 94$ dimensions** (number of Mel filters $\times$ number of time frames) representing the evolution of energy in Mel bands over time.
-
-### 2. Mel-Frequency Cepstral Coefficients (MFCCs)
-
-MFCCs are a **compact, highly efficient, and perceptually-based representation** of the spectral characteristics of the human vocal tract. They are particularly effective at capturing changes in the acoustic properties of the vocal tract (formants) that are affected by speech disorders in PD.
-
-The process involves:
-* **Pre-emphasis:** A filter is applied to the raw signal to boost higher frequencies and compensate for the natural attenuation of the vocal tract.
-* **Mel Filter Bank and Log Power Spectrum:** The spectrum is mapped to the Mel scale, and the logarithm of the power is taken to compress the dynamic range and increase feature stability.
-* **Discrete Cosine Transform (DCT):** A DCT is applied to the log Mel power spectrum to decorrelate the Mel bands and produce the final Cepstral Coefficients.
-* **Output:** The result is a 2D matrix with **$30 \times 94$ dimensions**, containing the key information about speech features like vowels and consonants.
-
-### 3. Feature Fusion
-
-Both the Mel Spectrograms and the MFCCs are **concatenated** and fed simultaneously to the parallel streams of the MPD-Net model. The combined feature input has a final shape of **$194 \times 60$**. Additional **metadata** such as the subject's age and gender is also extracted and included in the feature list.
-
-## MPD-Net Architecture Overview
-
-The **Multi-stream Parkinson's Disease Network (MPD-Net)** is a hybrid and parallel deep learning architecture designed for robust diagnosis of Parkinson's Disease (PD) from vocal features. It integrates three specialized feature processing streams that operate simultaneously to enhance model stability and feature diversity against real-world noise.
-
----
-
-### 1. Architectural Design (Parallel Hybrid Model)
-
-The architecture takes a combined 2D spectral feature map (Mel Spectrograms + MFCCs) and splits it into three parallel paths before the final classification layers.
-
-| Component | Architecture/Layers | Role in Feature Extraction |
-| :--- | :--- | :--- |
-| **Input** | Fused **Mel Spectrogram** and **MFCCs** (2D matrix) | Provides rich time-frequency information for simultaneous analysis across domains. |
-| **1. CNN Stream** | Two Conv2D blocks (32 and 64 filters) + MaxPooling2D | Extracts **spatial patterns** and **local features** (e.g., changes in frequency intensity over small time intervals). |
-| **2. LSTM Stream** | Two LSTM layers (64 and 32 units) + Dropout | Captures **temporal dependencies** and **long-term dynamics** over the signal sequence (e.g., progressive changes in articulation or sustained vocal instability). |
-| **3. Multi-Head Attention Stream** | Multi-Head Attention layer | Focuses the model on the **most critical time-frequency regions** that carry the highest diagnostic information (e.g., specific segments with tremor characteristics). |
-| **Fusion** | Concatenation (Haq) | Combines the learned representations from the three parallel, specialized feature extractors. |
-| **Classifier Head** | Dense Layer (128 units, ReLU) $\rightarrow$ Output Layer (1 unit, Sigmoid) | A bottleneck layer followed by binary classification to predict the final outcome ($\in \{Healthy, Parkinson's\}$). |
-
----
-
-### 2. Training and Optimization Parameters
-
-The MPD-Net was optimized to reduce computational complexity and enhance generalization. The reduction in the dense layer size compared to the reference model contributed to a significant reduction in the total parameter count.
-
-| Parameter | Value | Description |
-| :--- | :--- | :--- |
-| **Total Parameters** | $\approx 700,000$ | Represents a $\sim 69\%$ reduction compared to the reference PD-Net. |
-| **Optimizer** | Adam | Adaptive Moment Estimation algorithm for efficient training. |
-| **Loss Function** | Binary Cross-Entropy | Standard loss function for binary classification problems. |
-| **Epochs / Batch Size** | 30 / 32 | The number of training iterations and samples processed per parameter update. |
-| **Regularization** | Dropout (0.5) and L2 (0.001) | Used to prevent **overfitting** and encourage the learning of robust, generalized features. |
-
-
-## 🏆 Performance Evaluation and Comparative Analysis
-
-The **MPD-Net** model was comprehensively evaluated across multiple datasets to test both its **accuracy** on controlled data and its **robustness** on challenging, real-world data. A comparison with the sequential **PD-Net** model and a critical re-evaluation of the **Pre-trained** model are summarized below.
-
----
-
-### 1. Evaluation of Pre-trained Model (Re-evaluation)
-
-The initial high performance reported for the Convolutional Neural Network (CNN) based **Pre-trained** model was found to be misleading due to a methodological flaw (failure to strictly separate training and validation data), leading to **severe overfitting**.
-
-* **UAMS Dataset:** When the Pre-trained model was correctly re-evaluated with strict data separation, its average **AUC score dropped dramatically** from $\approx 0.97$ (overfitted result) to **$\approx 0.76$**.
-* **mPower Dataset (Real-World):** The performance collapse was even more pronounced on the noisy mPower dataset. The average **AUC dropped** from $\approx 0.91$ (overfitted result) to **$\approx 0.596$**, which is near random chance.
-
-This re-evaluation confirmed that **accurate validation protocols are critical** for reliable reporting of deep learning model capability.
-
----
-
-### 2. MPD-Net vs. PD-Net (Parallel vs. Sequential Architectures)
-
-The core finding of this study is the superior **robustness** of the parallel MPD-Net architecture when faced with degraded or noisy data.
-
-#### **Controlled Conditions (Italian Dataset)**
-
-On the high-quality, controlled Italian dataset, both models achieved excellent results, but demonstrated different strengths:
-
-* **MPD-Net (Parallel):** Achieved **AUC $\approx 1.00$** and demonstrated perfect **Sensitivity ($\mathbf{100\%}$)** for the vowel /a/. This makes it an **ideal screening tool** where missing a patient is unacceptable.
-    * *Feature Space:* Showed superior feature learning, increasing the separability index **d-prime to $\mathbf{180.2}$** for the vowel /a/, indicating complete class separation.
-* **PD-Net (Sequential):** Achieved **AUC $\approx 0.998$** and achieved perfect **Specificity ($\mathbf{100\%}$)** for the vowel /a/, producing **zero False Positives**. This makes it better suited for **diagnostic confirmation** where avoiding false alarms is critical.
-
-#### **Challenging Conditions (UAMS & mPower Datasets)**
-
-When tested on challenging data with varying quality and noise, the fundamental difference in robustness became clear:
-
-| Model | UAMS Dataset (Telephonic Data) | mPower Dataset (Real-World Noise) |
-| :--- | :--- | :--- |
-| **MPD-Net (Parallel)** | **AUC $\mathbf{= 0.871}$**. **Specificity $\mathbf{100\%}$**. | **AUC $\mathbf{= 0.653}$**. Demonstrated a **gradual degradation** and maintained performance slightly better than random chance. |
-| **PD-Net (Sequential)** | **AUC $\mathbf{= 0.649}$**. **Specificity $69.70\%$**. | **AUC $\mathbf{= 0.500}$**. Suffered a **catastrophic failure** (model collapse). The model achieved **Specificity of $\mathbf{0\%}$** by classifying every sample as "Parkinson's". |
-
-The results prove that the **MPD-Net's parallel architecture** is inherently **more resilient** (robust) to noise and variations in data quality than the sequential PD-Net.
-
----
-
-### 3. Interpretability Analysis (SHAP & Grad-CAM)
-
-Advanced interpretability techniques were used to diagnose the cause of performance degradation in the MPD-Net:
-
-* **On Italian Data (Clean):** The model used a **comprehensive and distributed strategy**, paying attention to subtle, long-term patterns across the entire signal for both Mel Spectrograms and MFCCs. This indicates meaningful learning.
-* **On UAMS Data (Medium Noise):** The model began to show a tendency for "tunnel vision" by concentrating its attention on a **specific, small area** at the beginning of the signal instead of analyzing the entire voice sample.
-* **On mPower Data (High Noise):** The model suffered from extreme **"Tunnel Vision"**. Instead of performing a comprehensive analysis, its attention collapsed onto a single, **small, and highly concentrated area** (usually the very beginning of the signal in the low-frequency Mel Spectrogram region). The model relied almost entirely on this potentially invalid segment for its decision, which directly explains its poor performance and inability to generalize on real-world data.
-
-## 🔍 Interpretability Methods for MPD-Net
-
-To understand how the **MPD-Net** model reaches a diagnostic decision and to diagnose the causes of performance degradation on noisy data, this research employed two advanced Explainable AI (**XAI**) techniques: **SHAP** (SHapley Additive exPlanations) and **Grad-CAM** (Gradient-weighted Class Activation Mapping).
-
----
+To ensure the model's decisions are transparent and to diagnose the root causes of performance degradation on real-world data, this study employed two complementary Explainable AI (XAI) techniques. These methods revealed that model failure on noisy data is often due to a "Tunnel Vision" phenomenon rather than a lack of model capacity.
 
 ### 1. SHAP (SHapley Additive exPlanations)
+SHAP analysis was used to quantify the contribution of individual input features (specific time-frequency points in the spectrogram) to the model's final diagnosis.
 
-SHAP is a method that focuses on the **feature level** to quantify the impact of each input feature on the model’s final prediction.
-
-* **Function:** It calculates the average marginal contribution of a feature value across all possible combinations of features.
-* **Application in Study:** SHAP was used on the complex, matrix-based input (**Mel Spectrograms** and **MFCCs**) to determine which specific frequency bands (features) at which points in time were most important for the diagnosis.
-* **Key Insight:** The SHAP difference maps (Parkinson's minus Healthy) clearly highlighted the **shift in the model's decision strategy** when moving from clean data to noisy data.
+* **Methodology:** We computed Global SHAP values to rank feature importance and generated "Difference Maps" by subtracting the average healthy attention map from the average Parkinson's attention map. This highlighted exactly which patterns drove the model to classify a sample as pathological.
+* **Distributed Strategy (Clean Data):** On the high-quality Italian dataset, SHAP values were distributed across the entire duration of the signal. The model relied on a complex combination of features from both Mel Spectrograms and MFCCs, indicating it learned robust, biological representations of the voice.
+* **Shortcut Learning (Noisy Data):** On the mPower dataset, SHAP analysis revealed that feature importance collapsed onto a small cluster of features at the very beginning of the recording. This indicated the model was bypassing the actual voice signal to rely on a "shortcut" or artifact.
 
 ### 2. Grad-CAM (Gradient-weighted Class Activation Mapping)
+Grad-CAM was applied to the Convolutional Neural Network (CNN) stream of the MPD-Net to visualize the spatial attention of the model within the 2D input matrix.
 
-Grad-CAM is a visualization technique that focuses on the **spatial level** of the input by producing heatmaps.
+* **Methodology:** Heatmaps were generated from the final convolutional layer to visualize which regions of the input image triggered the highest activation.
+* **Spectral Signatures (Clean Data):** On clean data, the attention maps displayed distinct vertical bands distributed throughout the audio sample. These correspond to specific spectral signatures (such as formants and harmonic deviations) that are clinically relevant to Parkinson's dysphonia.
+* **Tunnel Vision (Noisy Data):** On the noisy mPower data, Grad-CAM visually confirmed the "Tunnel Vision" phenomenon. The model's attention was restricted to a tiny, high-intensity spot at the absolute start of the spectrogram—likely a recording artifact (e.g., a microphone click or silence) rather than the vocal phonation.
 
-* **Function:** It highlights the regions within the input image or 2D feature map (the Mel Spectrogram/MFCC matrix) that caused the highest activation in the final convolutional layer, meaning those regions contributed the most to the model's output.
-* **Application in Study:** Grad-CAM provided a **visual confirmation** of the model's "gaze" or "attention". This was applied to the output of the CNN stream to visually check if the model was looking at the entire sound or just small segments.
-* **Key Insight:** Grad-CAM visually confirmed the phenomenon of **"Tunnel Vision"** by showing the attention collapsing onto a tiny, highly concentrated region at the start of the mPower signals.
+## Overall Conclusion
+This research demonstrates that model architecture plays a decisive role in the reliability of AI-based medical diagnostics. While both parallel (MPD-Net) and sequential (PD-Net) architectures can achieve near-perfect accuracy in controlled laboratory settings, their behaviors diverge significantly in real-world environments.
 
----
+The parallel MPD-Net architecture proved to be superior in terms of robustness and generalization. By processing spatial, temporal, and attentional features simultaneously, it maintained a distributed representation of the input signal even in the presence of heavy noise. In contrast, sequential architectures exhibited fragility, often collapsing into trivial solutions (predicting a single class) or overfitting to recording artifacts. Additionally, the re-evaluation of pre-trained models highlighted the critical importance of rigorous validation protocols; improper data splitting can lead to drastically inflated performance metrics that do not hold up in practice.
 
-### Comparison of Methods
+## Discussion
+The disparity between the results on the Italian dataset (AUC 1.00) and the mPower dataset (AUC 0.653) underscores the "reality gap" currently facing AI in voice analysis.
 
-The two methods are complementary:
-* **SHAP** provides a **quantitative and numerical** rank of feature importance.
-* **Grad-CAM** provides a **qualitative, visual map** of the influential regions within the 2D feature input.
+* **Sensitivity vs. Specificity:** In clean conditions, the parallel model favored high sensitivity (identifying almost all patients), making it suitable for screening. The sequential model favored high specificity (few false alarms), making it suitable for confirmation. However, this distinction vanished in noisy conditions where the sequential model failed.
+* **The Role of XAI:** The application of SHAP and Grad-CAM moved beyond simple visualization to become a core debugging tool. It revealed that the performance drop in "wild" data was not merely due to noise masking the signal, but due to the model actively learning to focus on invalid shortcuts (Tunnel Vision). This insight is invaluable for future feature engineering.
+* **Architecture robustness:** The parallel design of MPD-Net likely prevents error propagation that occurs in sequential models. In a sequential CNN-LSTM, if the CNN fails to extract clean features from noise, the LSTM receives corrupted data. In a parallel design, the LSTM and Attention heads operate on the raw features independently, providing a form of redundancy that preserves diagnostic signal.
 
-Together, they enabled a deep understanding of why the model succeeded on clean data (distributed attention) and failed on noisy data (collapsed attention).
+## Future Directions
+To bridge the gap between current research and clinical application, future work should focus on the following areas:
 
+1.  **Online Screening Platform:** Development of a web or mobile-based application to collect a wider variety of voice samples. This would not only serve as a screening tool but also generate the large-scale, diverse datasets needed to train the next generation of robust models.
+2.  **Advanced Domain Adaptation:** Implementing techniques to specifically address the domain shift between studio recordings and smartphone data. This could include adversarial training to make the model invariant to recording device characteristics.
+3.  **Privacy-Preserving Learning:** As data collection scales, implementing federated learning or other privacy-preserving techniques to ensure patient data remains secure while allowing for model improvements.
+4.  **Noise-Robust Feature Engineering:** Investigating feature extraction methods that are inherently less sensitive to environmental noise and recording artifacts compared to standard Mel Spectrograms.
+
+## Citation
+If you use this code for your research, please cite the repository:
+
+> **Baharvand, F.** (2025). *MPD-Net-Parkinsons-Voice-Diagnosis* . GitHub. https://github.com/baharvand79/MPD-Net-Parkinsons-Voice-Diagnosis
+
+Or use the BibTeX entry:
+
+```bibtex
+@misc{baharvand2025mpdnet,
+  author = {Baharvand, Fatemeh},
+  title = {MPD-Net-Parkinsons-Voice-Diagnosis},
+  year = {2025},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{[https://github.com/baharvand79/MPD-Net-Parkinsons-Voice-Diagnosis](https://github.com/baharvand79/MPD-Net-Parkinsons-Voice-Diagnosis)}}
+}
+```
