@@ -2,6 +2,8 @@
 
 The MPD-Net (Parallel) was compared against a Sequential baseline (PD-Net) and a Transfer Learning approach (InceptionV3) across three datasets. The results demonstrate the superior robustness of the parallel architecture in handling real-world, noisy data.
 
+![alt text](image.png)
+
 ## Performance Evaluation
 
 The model achieved near-perfect classification on the high-quality Italian dataset, demonstrating its capability to learn subtle vocal biomarkers in controlled conditions.
